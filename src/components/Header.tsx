@@ -1,11 +1,14 @@
 import styled from 'styled-components/native';
 import {Image} from 'react-native';
 import {THEME} from '../shared/Constant';
-import {HeaderProps} from '../shared/Types';
 import {Button} from '../shared/Styles';
 
 const header = require('../assets/images/header.png');
 const settings = require('../assets/images/settings.png');
+
+export interface HeaderProps {
+  title: string;
+}
 
 export const Header = (Props: HeaderProps) => {
   return (
