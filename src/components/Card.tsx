@@ -7,11 +7,11 @@ import {ColorProps, Styles} from '../shared/Types';
 import {
   VerticalView as _VerticalView,
   HorizontalView as _HorizontalView,
-  Button,
+  Button as _Button,
 } from '../shared/Styles';
 
 interface Props {
-  backgroundColor: string;
+  mode: string;
   heading: string;
   subHeading: string;
   styles: Styles;
@@ -31,12 +31,24 @@ export const Card = (Props: Props) => {
     <Container styles={Props.styles}>
       <HorizontalView>
         <VerticalViewLeft>
-          <Title color={THEME.tinted_black}>{Props.heading}</Title>
-          <Title color={THEME.tinted_black}>{Props.subHeading}</Title>
-          <Switch
-            isEnabled={morningRoutineSelected}
-            onPress={_toggleMorningRoutine}
-          />
+          <Title
+            color={
+              Props.mode == 'light' ? THEME.tinted_black : THEME.tinted_white
+            }>
+            {Props.heading}
+          </Title>
+          <Title
+            color={
+              Props.mode == 'light' ? THEME.tinted_black : THEME.tinted_white
+            }>
+            {Props.subHeading}
+          </Title>
+          <SwitchView>
+            <Switch
+              isEnabled={morningRoutineSelected}
+              onPress={_toggleMorningRoutine}
+            />
+          </SwitchView>
         </VerticalViewLeft>
         <VerticalViewRight>
           <Image source={Props?.image} />
@@ -50,14 +62,18 @@ export const Card = (Props: Props) => {
 };
 
 const VerticalViewLeft = styled(_VerticalView)`
-  justify-content: center;
+  justify-content: space-around;
 `;
 const VerticalViewRight = styled(_VerticalView)`
-  justify-content: center;
+  justify-content: space-around;
   align-items: flex-end;
 `;
 const HorizontalView = styled(_HorizontalView)`
   justify-content: space-between;
+`;
+
+const Button = styled(_Button)`
+  margin-top: 5px;
 `;
 
 const Container = styled.View<{styles: Styles}>`
@@ -70,6 +86,10 @@ const Container = styled.View<{styles: Styles}>`
   width: 168px;
   border-radius: 12px;
   padding: 10px;
+`;
+
+const SwitchView = styled.View`
+  margin-top: 6px;
 `;
 
 const Title = styled.Text<ColorProps>`
