@@ -26,6 +26,7 @@ import {
   Title,
 } from './styles';
 import {Item} from './Items';
+import {filter_} from '../../utils/helpers';
 
 const filterIcon = require('../../assets/images/filter.png');
 const cloud_moon = require('../../assets/images/cloud_moon.png');
@@ -45,6 +46,7 @@ export const Routines = () => {
   const [loading, setLoading] = useState(true);
   const [loadingList, setLoadingList] = useState(true);
   const [routineList, setRoutineList] = useState(data);
+  const [filter, setFilter] = useState(true);
 
   useEffect(() => {
     getData();
@@ -60,11 +62,12 @@ export const Routines = () => {
     fetchData(page, 10)
       .then(res => {
         const extractedData = res.docs.map(
-          ({name, schedule, visualAidUrl, _id}) => ({
+          ({name, schedule, visualAidUrl, _id, createdAt}) => ({
             name,
             schedule,
             visualAidUrl,
             _id,
+            createdAt,
           }),
         );
         setData([...data, ...extractedData]);
@@ -83,6 +86,10 @@ export const Routines = () => {
   };
 
   const search = useCallback(() => {}, []);
+  const _handleFilter = () => {
+    setRoutineList(filter_(routineList, filter));
+    setFilter(!filter);
+  };
 
   return (
     <Container>
@@ -116,7 +123,7 @@ export const Routines = () => {
           _handleChange={setSearchValue}
           _handleSearch={search}
         />
-        <Button>
+        <Button onPress={_handleFilter}>
           <Image source={filterIcon} />
         </Button>
       </ActionView>
@@ -133,6 +140,7 @@ export const Routines = () => {
                 schedule={item.schedule}
                 visualAidUrl={item.visualAidUrl}
                 _id={item._id}
+                createdAt={item.createdAt}
               />
             )}
             keyExtractor={(item: RoutineDataType) => item._id}

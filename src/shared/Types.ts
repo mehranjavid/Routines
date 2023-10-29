@@ -10,4 +10,5 @@ export interface RoutineDataType {
   schedule: any;
   visualAidUrl: string;
   _id: string;
+  createdAt: string;
 }
