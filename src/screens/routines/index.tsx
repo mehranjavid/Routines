@@ -1,5 +1,6 @@
 import styled from 'styled-components/native';
-import {FlatList, Image, Platform} from 'react-native';
+import axios from 'axios';
+import {ActivityIndicator, FlatList, Image, Platform, View} from 'react-native';
 import {Card} from '../../components/Card';
 import {THEME} from '../../shared/Constant';
 import {
@@ -7,9 +8,11 @@ import {
   VerticalView as _VerticalView,
   Button as _Button,
 } from '../../shared/Styles';
-import {ColorProps} from '../../shared/Types';
+import {ColorProps, RoutineDataType} from '../../shared/Types';
 import {SearchInput} from '../../components/SearchInput';
 import {useCallback, useEffect, useState} from 'react';
+import {fetchData} from '../../utils/api';
+import {useData} from '../../utils/store';
 
 const filterIcon = require('../../assets/images/filter.png');
 const cloud_moon = require('../../assets/images/cloud_moon.png');
@@ -18,55 +21,31 @@ const nightImage = require('../../assets/images/night.png');
 const angleButton = require('../../assets/images/angleButtonGreater.png');
 const angleButtonWhite = require('../../assets/images/angleButtonGreaterWhite.png');
 
-const DATA = [
-  {
-    id: 'bd7acbea-c1b1-46c2-ae5-3ad53abb28ba',
-    title: '1 Item',
-    image:
-      'https://goally-files-dev.s3.amazonaws.com/visualaids/symbol/pets/dogfood1.png',
-  },
-  {
-    id: 'bd7acbea-c1b1-46c2-assse5-3ad53abb28ba',
-    title: '1 Item',
-    image:
-      'https://goally-files-dev.s3.amazonaws.com/visualaids/symbol/pets/dogfood1.png',
-  },
-  {
-    id: 'bd7acbea-c1b1-46c2-axssse5-3ad53abb28ba',
-    title: '1 Item',
-    image:
-      'https://goally-files-dev.s3.amazonaws.com/visualaids/symbol/pets/dogfod1.png',
-  },
-];
-
-type ItemProps = {title: string; id: string; image: string};
-
-const Item = ({title, id, image}: ItemProps) => {
+const Item = ({name, schedule, visualAidUrl}: RoutineDataType) => {
   const [imageSource, setImageSource] = useState({});
   const [imageAvailable, setImageAvailable] = useState(false);
 
   useEffect(() => {
-    const fetchImage = async () => {
-      try {
-        const response = await fetch(image);
-        const data = await response.blob();
-
-        const reader = new FileReader();
-        reader.onload = () => {
-          setImageSource({uri: reader.result});
-          setImageAvailable(true);
-        };
-        reader.onerror = error => {
-          setImageAvailable(false);
-        };
-        reader.readAsDataURL(data);
-      } catch (error) {
-        console.log('Image fetch error:', error);
-      }
-    };
-
     fetchImage();
   }, []);
+
+  const fetchImage = async () => {
+    try {
+      const response = await axios.get(visualAidUrl, {responseType: 'blob'});
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImageSource({uri: reader.result});
+        setImageAvailable(true);
+      };
+      reader.onerror = () => {
+        setImageAvailable(false);
+      };
+      reader.readAsDataURL(response.data);
+    } catch (error) {
+      console.log('Image fetch error:', error);
+    }
+  };
 
   return (
     <FlatlistItems>
@@ -74,7 +53,7 @@ const Item = ({title, id, image}: ItemProps) => {
         {imageAvailable ? (
           <FlatlistItemImage
             source={imageSource}
-            onError={error => console.log('Image load error:', error)}
+            onError={() => setImageAvailable(false)}
           />
         ) : (
           <RoutinesImage>
@@ -82,8 +61,12 @@ const Item = ({title, id, image}: ItemProps) => {
           </RoutinesImage>
         )}
         <_VerticalView>
-          <FlatlistItemsTitle color={'#1A1C1E'}>{title}</FlatlistItemsTitle>
-          <FlatlistItemsTitle color={'#1A1C1E'}>{title}</FlatlistItemsTitle>
+          <FlatlistItemsTitle color={THEME.lable}>{name}</FlatlistItemsTitle>
+          <FlatlistItemsTitle color={THEME.lable}>
+            {Object.keys(schedule)[0] +
+              ' ' +
+              schedule[Object.keys(schedule)[0]] || 'No Appointments'}
+          </FlatlistItemsTitle>
         </_VerticalView>
       </_HorizontalView>
       <Image source={angleButton} />
@@ -93,6 +76,46 @@ const Item = ({title, id, image}: ItemProps) => {
 
 export const Routines = () => {
   const [searchValue, setSearchValue] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [loadingList, setLoadingList] = useState(true);
+
+  const setData = useData(state => state.setData);
+  const setPagesCount = useData(state => state.setPages);
+  const data = useData(state => state.data);
+  const hasNextPage = useData(state => state.hasNextPage);
+  const nextPage = useData(state => state.nextPage);
+
+  useEffect(() => {
+    getData();
+  }, []);
+
+  const getData = () => {
+    let page = hasNextPage ? nextPage : 1;
+    setLoadingList(true);
+    fetchData(page, 10)
+      .then(res => {
+        const extractedData = res.docs.map(
+          ({name, schedule, visualAidUrl, _id}) => ({
+            name,
+            schedule,
+            visualAidUrl,
+            _id,
+          }),
+        );
+        setData([...data, ...extractedData]);
+        setPagesCount(
+          res.totalPages,
+          res.hasPrevPage,
+          res.hasNextPage,
+          res.prevPage,
+          res.nextPage,
+        );
+      })
+      .finally(() => {
+        setLoading(false);
+        setLoadingList(false);
+      });
+  };
 
   const search = useCallback(() => {}, []);
 
@@ -134,16 +157,46 @@ export const Routines = () => {
       </ActionView>
       <FlatListView style={{flex: 1}}>
         <BackgroundImage source={cloud_moon} resizeMode="center" />
-        <FlatList
-          data={DATA as ItemProps[]}
-          renderItem={({item}: {item: ItemProps}) => (
-            <Item title={item.title} id={item.id} image={item.image} />
-          )}
-          keyExtractor={(item: ItemProps) => item.id}
-          ItemSeparatorComponent={() => {
-            return <FlatlistItemsSeperator />;
-          }}
-        />
+        {loading ? (
+          <RoutineImageContent>Loading...</RoutineImageContent>
+        ) : (
+          <FlatList
+            data={data as RoutineDataType[]}
+            renderItem={({item}: {item: RoutineDataType}) => (
+              <Item
+                name={item.name}
+                schedule={item.schedule}
+                visualAidUrl={item.visualAidUrl}
+                _id={item._id}
+              />
+            )}
+            keyExtractor={(item: RoutineDataType) => item._id}
+            ItemSeparatorComponent={() => {
+              return <FlatlistItemsSeperator />;
+            }}
+            ListEmptyComponent={() => {
+              return (
+                <RoutineImageContent>No data available</RoutineImageContent>
+              );
+            }}
+            onEndReached={() => {
+              if (hasNextPage && !loadingList) {
+                getData();
+              }
+            }}
+            ListFooterComponent={() => {
+              if (!loadingList) return null;
+              return (
+                <View style={{bottom: 10}}>
+                  <ActivityIndicator
+                    size="small"
+                    color={THEME.selected_green}
+                  />
+                </View>
+              );
+            }}
+          />
+        )}
       </FlatListView>
     </Container>
   );

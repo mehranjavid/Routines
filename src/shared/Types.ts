@@ -4,3 +4,10 @@ export interface ColorProps {
 export interface Styles {
   [key: string]: string;
 }
+
+export interface RoutineDataType {
+  name: string;
+  schedule: any;
+  visualAidUrl: string;
+  _id: string;
+}
