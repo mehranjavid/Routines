@@ -1,7 +1,6 @@
 import styled from 'styled-components/native';
-import {Image} from 'react-native';
+import {Image, View} from 'react-native';
 import {THEME} from '../shared/Constant';
-import {Button} from '../shared/Styles';
 
 const header = require('../assets/images/header.png');
 const settings = require('../assets/images/settings.png');
@@ -13,13 +12,13 @@ export interface HeaderProps {
 export const Header = (Props: HeaderProps) => {
   return (
     <Container>
-      <Button>
+      <View>
         <Image source={header} />
-      </Button>
+      </View>
       <Title>{Props.title}</Title>
-      <Button>
+      <View>
         <Image source={settings} />
-      </Button>
+      </View>
     </Container>
   );
 };

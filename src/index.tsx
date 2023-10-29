@@ -7,18 +7,19 @@ import {THEME, CONTENT} from './shared/Constant';
 
 function App(): JSX.Element {
   return (
-    <SafeAreaView>
+    <>
       <StatusBar barStyle={'light-content'} backgroundColor={THEME.base} />
+      <SafeAreaView style={{flex: 0, backgroundColor: THEME.base}} />
       <Container>
         <Header title={CONTENT.title} />
         <Routines />
       </Container>
-    </SafeAreaView>
+    </>
   );
 }
 
 const Container = styled.View`
-  height: 100%;
+  flex: 1;
   background-color: #fdfcff;
 `;
 
