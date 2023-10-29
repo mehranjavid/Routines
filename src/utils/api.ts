@@ -1,7 +1,12 @@
 import axios, {AxiosResponse} from 'axios';
 
 interface ApiResponse {
-  data: any;
+  docs: [];
+  totalPages: number;
+  hasPrevPage: boolean;
+  hasNextPage: boolean;
+  prevPage: number;
+  nextPage: number;
 }
 
 const SERVER = process.env.SERVER;
