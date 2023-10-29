@@ -1,4 +1,5 @@
 import styled from 'styled-components/native';
+import axios from 'axios';
 import {FlatList, Image, Platform} from 'react-native';
 import {Card} from '../../components/Card';
 import {THEME} from '../../shared/Constant';
@@ -10,6 +11,7 @@ import {
 import {ColorProps} from '../../shared/Types';
 import {SearchInput} from '../../components/SearchInput';
 import {useCallback, useEffect, useState} from 'react';
+import {fetchData} from '../../utils/api';
 
 const filterIcon = require('../../assets/images/filter.png');
 const cloud_moon = require('../../assets/images/cloud_moon.png');
@@ -48,25 +50,24 @@ const Item = ({title, id, image}: ItemProps) => {
   useEffect(() => {
     const fetchImage = async () => {
       try {
-        const response = await fetch(image);
-        const data = await response.blob();
+        const response = await axios.get(image, {responseType: 'blob'});
 
         const reader = new FileReader();
         reader.onload = () => {
           setImageSource({uri: reader.result});
           setImageAvailable(true);
         };
-        reader.onerror = error => {
+        reader.onerror = () => {
           setImageAvailable(false);
         };
-        reader.readAsDataURL(data);
+        reader.readAsDataURL(response.data);
       } catch (error) {
         console.log('Image fetch error:', error);
       }
     };
 
     fetchImage();
-  }, []);
+  }, [image]);
 
   return (
     <FlatlistItems>
@@ -74,7 +75,7 @@ const Item = ({title, id, image}: ItemProps) => {
         {imageAvailable ? (
           <FlatlistItemImage
             source={imageSource}
-            onError={error => console.log('Image load error:', error)}
+            onError={() => setImageAvailable(false)}
           />
         ) : (
           <RoutinesImage>
@@ -93,6 +94,9 @@ const Item = ({title, id, image}: ItemProps) => {
 
 export const Routines = () => {
   const [searchValue, setSearchValue] = useState('');
+  useEffect(() => {
+    fetchData(1).then(res => console.log(res));
+  });
 
   const search = useCallback(() => {}, []);
 
