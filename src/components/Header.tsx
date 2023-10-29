@@ -1,28 +1,28 @@
 import styled from 'styled-components/native';
-import { Image } from 'react-native';
-import { THEME } from '../shared/Constant';
-import { HeaderProps } from '../shared/Types';
+import {Image, View} from 'react-native';
+import {THEME} from '../shared/Constant';
 
-const header = require('../assets/images/header.png')
-const settings = require('../assets/images/settings.png')
+const header = require('../assets/images/header.png');
+const settings = require('../assets/images/settings.png');
 
-export const Header = (Props: HeaderProps) => {
-
-  return (
-    <Container>
-        <Button>
-            <Image source={header}/>
-        </Button>
-        <Title>{Props.title}</Title>
-        <Button>
-            <Image source={settings}/>
-        </Button>
-    </Container>
-  );
+export interface HeaderProps {
+  title: string;
 }
 
-const Button = styled.TouchableOpacity`
-`
+export const Header = (Props: HeaderProps) => {
+  return (
+    <Container>
+      <View>
+        <Image source={header} />
+      </View>
+      <Title>{Props.title}</Title>
+      <View>
+        <Image source={settings} />
+      </View>
+    </Container>
+  );
+};
+
 const Container = styled.View`
   height: 100px;
   background-color: ${THEME.base};
@@ -37,5 +37,5 @@ const Title = styled.Text`
   font-size: 20px;
   font-weight: 400;
   line-height: 24px;
-  color: #FFFFFF;
+  color: #ffffff;
 `;
