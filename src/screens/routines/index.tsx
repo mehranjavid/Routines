@@ -26,7 +26,7 @@ import {
   Title,
 } from './styles';
 import {Item} from './Items';
-import {filterActivity, searchActivity} from '../../utils/helpers';
+import {filterActivity, searchActivity} from './helpers';
 
 const filterIcon = require('../../assets/images/filter.png');
 const cloud_moon = require('../../assets/images/cloud_moon.png');
@@ -43,6 +43,7 @@ export const Routines = () => {
   const nextPage = useData(state => state.nextPage);
 
   const [searchValue, setSearchValue] = useState('');
+  const [searching, setSearching] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingList, setLoadingList] = useState(true);
   const [routineList, setRoutineList] = useState(data);
@@ -86,7 +87,13 @@ export const Routines = () => {
   };
 
   const search = useCallback(() => {
-    setRoutineList(searchActivity(routineList, searchValue));
+    if (!searchValue) {
+      setSearching(false);
+      setRoutineList(data);
+    } else {
+      setSearching(true);
+      setRoutineList(searchActivity(data, searchValue));
+    }
   }, [searchValue]);
 
   const _handleFilter = () => {
@@ -156,12 +163,12 @@ export const Routines = () => {
               );
             }}
             onEndReached={() => {
-              if (hasNextPage && !loadingList) {
+              if (hasNextPage && !loadingList && !searching) {
                 getData();
               }
             }}
             ListFooterComponent={() => {
-              if (!loadingList) return null;
+              if (!loadingList || searching) return null;
               return (
                 <View style={{bottom: 10}}>
                   <ActivityIndicator
