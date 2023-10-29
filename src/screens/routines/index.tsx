@@ -26,7 +26,7 @@ import {
   Title,
 } from './styles';
 import {Item} from './Items';
-import {filter_} from '../../utils/helpers';
+import {filterActivity, searchActivity} from '../../utils/helpers';
 
 const filterIcon = require('../../assets/images/filter.png');
 const cloud_moon = require('../../assets/images/cloud_moon.png');
@@ -85,9 +85,12 @@ export const Routines = () => {
       });
   };
 
-  const search = useCallback(() => {}, []);
+  const search = useCallback(() => {
+    setRoutineList(searchActivity(routineList, searchValue));
+  }, [searchValue]);
+
   const _handleFilter = () => {
-    setRoutineList(filter_(routineList, filter));
+    setRoutineList(filterActivity(routineList, filter));
     setFilter(!filter);
   };
 

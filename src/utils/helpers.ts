@@ -8,7 +8,10 @@ interface Activity {
   createdAt: string;
 }
 
-export const filter_ = (data: Activity[], sortOrder: boolean): Activity[] => {
+export const filterActivity = (
+  data: Activity[],
+  sortOrder: boolean,
+): Activity[] => {
   const newData = [...data];
 
   newData.sort((a, b) => {
@@ -25,4 +28,14 @@ export const filter_ = (data: Activity[], sortOrder: boolean): Activity[] => {
   });
 
   return newData;
+};
+
+export const searchActivity = (
+  originalData: Activity[],
+  searchQuery: string,
+) => {
+  const filteredData = originalData.filter(item =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+  return filteredData;
 };
